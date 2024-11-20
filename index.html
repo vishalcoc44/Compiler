@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coding Website</title>
+  <link rel="stylesheet" href="compiler.css">
+</head>
+<body>
+  <div class="left-section">
+    <p>Question</p>
+  </div>
+  <div class="right-section">
+    <div class="top-row">
+      <select id="language-selector">
+        <option value="python3">Python 3</option>
+        <option value="java">Java</option>
+        <option value="c">C</option>
+        <option value="javascript">JavaScript</option>
+      </select>
+    </div>
+    <div class="main-content">
+      <textarea class="user-input" placeholder="Enter your code here"></textarea>
+      <div class="Output"><h1>Output:</h1><span id="Output"></span></div>
+    </div>
+    <div class="bottom-section">
+      <button>SAVE & EXIT</button>
+      <button class="run" onclick="sendDataToBackend()">RUN</button>
+      <button>SUBMIT</button>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <script>
+    var spanElement = document.getElementById("Output");
+
+    function formatMultiline(jsonString) {
+      return jsonString.replace(/\n/g, '<br>');
+    }
+
+    function sendDataToBackend() {
+      var code_input = document.getElementsByClassName("user-input")[0].value;
+      var selectedLanguage = document.getElementById('language-selector').value;
+
+      const dataToSend = {
+        "code": code_input,
+        "type": selectedLanguage
+      };
+
+      fetch('http://localhost:3000/api/sendData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: dataToSend }),
+      })
+      .then(response => response.json())
+      .then(responseData => {
+        const responsedata = formatMultiline(responseData["output"]) + "<br>" + "CpuTime: " + responseData["cpuTime"];
+        spanElement.innerHTML = responsedata;
+      })
+      .catch(error => {
+        console.error('Error sending data to backend:', error);
+        spanElement.innerHTML = "An error occurred. Please try again.";
+      });
+    }
+  </script>
+</body>
+</html>
